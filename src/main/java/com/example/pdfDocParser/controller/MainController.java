@@ -12,11 +12,12 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import javax.mail.internet.MimeMessage;
 import javax.xml.bind.JAXBElement;
 import java.io.File;
@@ -40,22 +41,17 @@ public class MainController {
     public void sendEmail(String mail) throws Exception {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom(mailFrom);
         helper.setTo(mail);
         helper.setSubject("Документ");
         helper.setText("Document");
-        helper.setFrom(mailFrom);
-        FileSystemResource file  = new FileSystemResource(new File("docx/templateResult.docx"));
+        FileSystemResource file = new FileSystemResource(new File("docx/templateResult.docx"));
         helper.addAttachment("templateResult.docx", file);
         javaMailSender.send(message);
     }
 
-    @GetMapping
-    public String getPage() {
-        return "index";
-    }
-
-
     @PostMapping
+    @ResponseBody
     @RequestMapping("/change")
     public String getDocumentInfo(@RequestBody String json) throws Exception {
         String email = "";
@@ -83,7 +79,7 @@ public class MainController {
             sendEmail(email);
         } catch (Exception ignored) {
         }
-        return "index";
+        return "Successful";
     }
 
     private WordprocessingMLPackage getTemplate(String name) throws Docx4JException, FileNotFoundException {
